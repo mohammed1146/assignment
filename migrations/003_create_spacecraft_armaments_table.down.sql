@@ -1,0 +1,1 @@
+DROP TABLE spacecraft_armaments;

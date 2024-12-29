@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: application_db
+      MYSQL_USER: application_usr
+      MYSQL_PASSWORD: application_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data1:/var/lib/mysql
+    networks:
+      - "skeleton"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=application_usr
+      - DB_PASSWORD=application_pass
+      - DB_NAME=application_db
+      - APP_PORT=8080
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+    command: [ "./main" ]
+    networks:
+      - "skeleton"
+
+volumes:
+  mysql-data1:
+
+networks:
+  skeleton:
+    driver: "bridge"
